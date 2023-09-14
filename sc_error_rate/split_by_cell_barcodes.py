@@ -16,21 +16,22 @@ def split_bam_file_by_cell_barcodes(bam_file_path: Path,
     """
     output_folder.mkdir(parents=True, exist_ok=True)
     samfile_input = pysam.AlignmentFile(bam_file_path, "rb")
-    output_files_by_barcode = {barcode: pysam.AlignmentFile(output_folder / f"{barcode}.bam", "wb",
-                                                            template=samfile_input)
-                               for barcode in cell_barcodes}
+    output_file_names_by_barcode = {barcode: output_folder / f"{barcode}.bam" for barcode in cell_barcodes}
+    output_samfiles_by_barcode = {barcode: pysam.AlignmentFile(file_path, "wb",
+                                                               template=samfile_input)
+                                  for barcode, file_path in output_file_names_by_barcode.items()}
     for read in tqdm(samfile_input, desc='Processing reads from the input .bam file'):
         if not (read.has_tag('CB') and read.has_tag('UB')):
             continue
 
         read_barcode = read.get_tag('CB')
         if read_barcode in cell_barcodes:
-            output_files_by_barcode[read_barcode].write(read)
+            output_samfiles_by_barcode[read_barcode].write(read)
 
-    for samfile_output in output_files_by_barcode.values():
+    for samfile_output in output_samfiles_by_barcode.values():
         samfile_output.close()
-    for barcode in tqdm(cell_barcodes, desc='Indexing .bam files'):
-        pysam.index(str(output_folder / f"{barcode}.bam"))
+    for file_name in tqdm(output_file_names_by_barcode.values(), desc='Indexing .bam files'):
+        pysam.index(str(file_name))
 
 
 def split_aging_mouse_data_by_cell_barcodes(aging_mouse_data_folder_path: Path) -> None:
