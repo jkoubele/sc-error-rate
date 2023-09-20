@@ -44,5 +44,17 @@ def split_aging_mouse_data_by_cell_barcodes(aging_mouse_data_folder_path: Path) 
                                     output_folder=split_by_cells_folder_path / aging_mouse_data_folder_path.name)
 
 
+def split_dietary_restriction_mouse_data_by_cell_barcodes(dietary_restriction_mouse_data_folder_path: Path) -> None:
+    barcodes_df = pd.read_csv(
+        dietary_restriction_mouse_data_folder_path / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
+        delimiter='\t',
+        names=['barcode'])
+    split_bam_file_by_cell_barcodes(
+        bam_file_path=dietary_restriction_mouse_data_folder_path / 'Aligned.sortedByCoord.out.bam',
+        cell_barcodes=set(barcodes_df['barcode']),
+        output_folder=split_by_cells_folder_path / dietary_restriction_mouse_data_folder_path.name)
+
+
 if __name__ == "__main__":
-    split_aging_mouse_data_by_cell_barcodes(raw_data_folder_path / '10X_P5_0')
+    # split_aging_mouse_data_by_cell_barcodes(raw_data_folder_path / '10X_P5_0')
+    split_dietary_restriction_mouse_data_by_cell_barcodes(raw_data_folder_path / 'DR1_old')
