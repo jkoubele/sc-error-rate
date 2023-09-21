@@ -1,14 +1,17 @@
 from pathlib import Path
-from tqdm import tqdm
-import pysam
-from sc_error_rate.paths import split_by_cells_folder_path, raw_data_folder_path
+
 import pandas as pd
+import pysam
+from tqdm import tqdm
+
+from sc_error_rate.paths import split_by_cells_folder_path, raw_data_folder_path
 
 
 def split_bam_file_by_cell_barcodes(bam_file_path: Path,
                                     cell_barcodes: set[str],
                                     output_folder: Path) -> None:
     """
+    Split .bam file to multiple smaller ones, each containing reads from a single cell.
     :param bam_file_path: Path to a .bam file with reads.
     :param cell_barcodes: Set of cell barcodes. Reads with barcodes not present in cell_barcodes will be ignored.
     :param output_folder: Folder to which the resulting files will be written.
