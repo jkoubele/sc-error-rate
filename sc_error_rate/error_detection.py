@@ -199,7 +199,7 @@ def process_cell_files(input_folder: Path,
                                         if record.name.startswith('chr')}
     output_folder.mkdir(parents=True, exist_ok=True)
     bam_file_paths = [file_path for file_path in input_folder.iterdir() if file_path.suffix == '.bam']
-    for file_path in tqdm(bam_file_paths, desc='Detecting sequence errors in bam files of individual cells'):
+    for file_path in tqdm(bam_file_paths, desc='Detecting sequence errors in the .bam files of individual cells'):
         cell_error_statistics = compute_cell_error_statistics(file_path, reference_genome)
         with open(output_folder / f'{cell_error_statistics.barcode}.json', 'w') as output_file:
             output_file.write(cell_error_statistics.to_json())
