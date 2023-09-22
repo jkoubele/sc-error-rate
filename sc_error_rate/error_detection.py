@@ -75,7 +75,7 @@ def get_consensus_read(aligned_reads_with_position: list[AlignedReadWithPosition
      voting result in a tie, None is returned.
     """
     symbol_occurrences = count_symbol_occurrences(
-        [aligned_read.read.seq[aligned_read.position] for aligned_read in aligned_reads_with_position])
+        [aligned_read.read.query_sequence[aligned_read.position] for aligned_read in aligned_reads_with_position])
     if symbol_occurrences[2].count > 0:
         return None  # more than 2 different bases at single position
     return symbol_occurrences[0].symbol if symbol_occurrences[0].count > len(aligned_reads_with_position) / 2 else None
@@ -120,8 +120,11 @@ def compute_cell_error_statistics(bam_file_path: Path,
             if pileup_column.get_num_aligned() < min_reads_per_umi * min_consensus_reads:
                 continue
 
-            aligned_reads = [pileup_read.alignment for pileup_read in pileup_column.pileups]
-            query_positions = pileup_column.get_query_positions()
+            mapping_qualities = pileup_column.get_mapping_qualities()
+            aligned_reads = [pileup_read.alignment for pileup_read, mapping_quality in
+                             zip(pileup_column.pileups, mapping_qualities) if mapping_quality >= 255]
+            query_positions = [position for position, mapping_quality in
+                               zip(pileup_column.get_query_positions(), mapping_qualities) if mapping_quality >= 255]
 
             aligned_reads_by_umi: dict[str, list[AlignedReadWithPosition]] = defaultdict(list)
             for read, position in zip(aligned_reads, query_positions):
@@ -163,7 +166,7 @@ def compute_cell_error_statistics(bam_file_path: Path,
                                            consensus_read_counts[1].symbol,
                                            num_unique_umi=len(aligned_reads_by_umi),
                                            read_counts=count_symbol_occurrences(
-                                               [read.seq[position] for read, position in
+                                               [read.query_sequence[position] for read, position in
                                                 zip(aligned_reads, query_positions)]),
                                            consensus_read_counts=consensus_read_counts)
             if ((consensus_read_counts[0].symbol == reference_symbol) and
@@ -207,5 +210,5 @@ def process_cell_files(input_folder: Path,
 
 if __name__ == "__main__":
     process_cell_files(input_folder=split_by_cells_folder_path / 'DR1_old',
-                       output_folder=detected_errors_data_folder_path / 'DR1_old',
+                       output_folder=detected_errors_data_folder_path / 'DR1_old_255_quality',
                        reference_genome_fasta_file_path=reference_genome_folder_path / 'genome.fa')
