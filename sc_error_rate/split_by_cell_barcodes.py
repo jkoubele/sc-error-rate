@@ -1,4 +1,5 @@
 from pathlib import Path
+from threading import Thread
 
 import pandas as pd
 import pysam
@@ -59,5 +60,11 @@ def split_dietary_restriction_mouse_data_by_cell_barcodes(dietary_restriction_mo
 
 
 if __name__ == "__main__":
-    # split_aging_mouse_data_by_cell_barcodes(raw_data_folder_path / '10X_P5_0')
-    split_dietary_restriction_mouse_data_by_cell_barcodes(raw_data_folder_path / 'DR1_old')
+    threads_to_run = [Thread(target=split_dietary_restriction_mouse_data_by_cell_barcodes,
+                             args=(raw_data_folder_path / dataset_name,))
+                      for dataset_name in ('bm_ir_v3',)]
+    for thread in threads_to_run:
+        thread.start()
+    for thread in threads_to_run:
+        thread.join()
+    # split_dietary_restriction_mouse_data_by_cell_barcodes(raw_data_folder_path / 'DR1_old')

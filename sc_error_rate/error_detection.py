@@ -1,6 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+from threading import Thread
 from typing import Optional
 
 import pysam
@@ -209,6 +210,12 @@ def process_cell_files(input_folder: Path,
 
 
 if __name__ == "__main__":
-    process_cell_files(input_folder=split_by_cells_folder_path / 'DR1_old',
-                       output_folder=detected_errors_data_folder_path / 'DR1_old_255_quality',
-                       reference_genome_fasta_file_path=reference_genome_folder_path / 'genome.fa')
+    threads_to_run = [Thread(target=process_cell_files,
+                             args=(split_by_cells_folder_path / dataset_name,
+                                   detected_errors_data_folder_path / dataset_name,
+                                   reference_genome_folder_path / 'genome.fa'))
+                      for dataset_name in ('bm_ir_v3',)]
+    for thread in threads_to_run:
+        thread.start()
+    for thread in threads_to_run:
+        thread.join()
