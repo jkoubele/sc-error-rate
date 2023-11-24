@@ -209,6 +209,8 @@ def process_cell_files(input_folder: Path,
 
 
 if __name__ == "__main__":
-    process_cell_files(input_folder=split_by_cells_folder_path / 'DR1_old',
-                       output_folder=detected_errors_data_folder_path / 'DR1_old_255_quality',
-                       reference_genome_fasta_file_path=reference_genome_folder_path / 'genome.fa')
+    cellfile_data_path = Path('/cellfile/datapublic/jkoubele/sc_error_rate_data')
+    process_cell_files(input_folder=Path('/cellfile/datapublic/jkoubele/sc_error_rate_data/split_by_cells/DR1_old'),
+                       output_folder=Path('/cellfile/datapublic/jkoubele/sc_error_rate_data/DR1_old'),
+                       reference_genome_fasta_file_path=Path(
+                           '/cellfile/datapublic/apapada1/Felix_scRNAseq/refdata-gex-mm10-2020-A/fasta/genome.fa'))
