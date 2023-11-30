@@ -59,9 +59,8 @@ def split_dietary_restriction_mouse_data_by_cell_barcodes(dietary_restriction_mo
 
 
 if __name__ == "__main__":
-    cellfile_data_path = Path('/cellfile/datapublic/jkoubele/sc_error_rate_data')
-
-    input_folder_path = Path('/cellfile/datapublic/acherdi1/rnaspeed/datasets_mm/age_DR/res/DR1_old')
+    # cellfile_data_path = Path('/cellfile/datapublic/jkoubele/sc_error_rate_data')
+    input_folder_path = Path('/cellfile/datapublic/acherdi1/rnaspeed/datasets_mm/age_DR/res/young_AL5')
     # pysam.index(str(input_folder_path / 'Aligned.sortedByCoord.out.bam'))
     barcodes_df = pd.read_csv(
         input_folder_path / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
@@ -70,5 +69,15 @@ if __name__ == "__main__":
     split_bam_file_by_cell_barcodes(
         bam_file_path=input_folder_path / 'Aligned.sortedByCoord.out.bam',
         cell_barcodes=set(barcodes_df['barcode']),
-        output_folder=cellfile_data_path / 'DR1_old')
+        output_folder=Path('/cellfile/datapublic/jkoubele/DR_dataset/young_AL5'))
 
+    input_folder_path_2 = Path('/cellfile/datapublic/acherdi1/rnaspeed/datasets_mm/age_DR/res/AL4_old')
+    # pysam.index(str(input_folder_path / 'Aligned.sortedByCoord.out.bam'))
+    barcodes_df = pd.read_csv(
+        input_folder_path_2 / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
+        delimiter='\t',
+        names=['barcode'])
+    split_bam_file_by_cell_barcodes(
+        bam_file_path=input_folder_path_2 / 'Aligned.sortedByCoord.out.bam',
+        cell_barcodes=set(barcodes_df['barcode']),
+        output_folder=Path('/cellfile/datapublic/jkoubele/DR_dataset/AL4_old'))
