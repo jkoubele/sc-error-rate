@@ -1,4 +1,5 @@
 from pathlib import Path
+from threading import Thread
 
 import pandas as pd
 import pysam

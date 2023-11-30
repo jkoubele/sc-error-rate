@@ -2,6 +2,7 @@ import argparse
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+from threading import Thread
 from typing import Optional
 
 import pysam
