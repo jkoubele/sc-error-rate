@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Thread
 from typing import Optional
-
+from itertools import chain
 import pysam
 
 from Bio import SeqIO, Seq
@@ -198,9 +198,13 @@ def compute_cell_error_statistics(bam_file_path: Path,
                                        error_nucleotide=consensus_read_counts[1].symbol,
                                        error_umi=umis_by_symbol[consensus_read_counts[1].symbol][0],
                                        num_unique_umi=len(aligned_reads_by_umi),
+                                       # read_counts=count_symbol_occurrences(
+                                       #     [read.query_sequence[position] for read, position in
+                                       #      zip(aligned_reads, query_positions)]),
                                        read_counts=count_symbol_occurrences(
-                                           [read.query_sequence[position] for read, position in
-                                            zip(aligned_reads, query_positions)]),
+                                           [read_with_position.read.query_sequence[read_with_position.position] for
+                                            read_with_position
+                                            in list(chain.from_iterable(aligned_reads_by_umi.values()))]),
                                        consensus_read_counts=consensus_read_counts
                                        )
                 )

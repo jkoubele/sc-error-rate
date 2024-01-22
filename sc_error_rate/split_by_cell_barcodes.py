@@ -1,11 +1,8 @@
 from pathlib import Path
-from threading import Thread
-
+import argparse
 import pandas as pd
 import pysam
 from tqdm import tqdm
-
-from sc_error_rate.paths import split_by_cells_folder_path, raw_data_folder_path
 
 
 def split_bam_file_by_cell_barcodes(bam_file_path: Path,
@@ -28,9 +25,12 @@ def split_bam_file_by_cell_barcodes(bam_file_path: Path,
         if not (read.has_tag('CB') and read.has_tag('UB')):
             continue
 
-        read_barcode = read.get_tag('CB')
-        if read_barcode in cell_barcodes:
-            output_samfiles_by_barcode[read_barcode].write(read)
+        read_cell_barcode = read.get_tag('CB')
+        umi = read.get_tag('UB')
+        if len(read_cell_barcode) <= 5 or len(umi) <= 5:
+            continue  # instead of CB or UB tag being None, it can be also '-', ' - ' or similar
+        if read_cell_barcode in cell_barcodes:
+            output_samfiles_by_barcode[read_cell_barcode].write(read)
 
     for samfile_output in output_samfiles_by_barcode.values():
         samfile_output.close()
@@ -38,47 +38,25 @@ def split_bam_file_by_cell_barcodes(bam_file_path: Path,
         pysam.index(str(file_name))
 
 
-def split_aging_mouse_data_by_cell_barcodes(aging_mouse_data_folder_path: Path) -> None:
+def split_star_solo_output(star_solo_output_folder: Path, output_folder: Path) -> None:
     barcodes_df = pd.read_csv(
-        aging_mouse_data_folder_path / Path('outs/filtered_gene_bc_matrices/gencode.vM19/barcodes.tsv'),
-        delimiter='\t',
-        names=['barcode'])
-    split_bam_file_by_cell_barcodes(bam_file_path=aging_mouse_data_folder_path / 'outs/possorted_genome_bam.bam',
-                                    cell_barcodes=set(barcodes_df['barcode']),
-                                    output_folder=split_by_cells_folder_path / aging_mouse_data_folder_path.name)
-
-
-def split_dietary_restriction_mouse_data_by_cell_barcodes(dietary_restriction_mouse_data_folder_path: Path) -> None:
-    barcodes_df = pd.read_csv(
-        dietary_restriction_mouse_data_folder_path / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
+        star_solo_output_folder / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
         delimiter='\t',
         names=['barcode'])
     split_bam_file_by_cell_barcodes(
-        bam_file_path=dietary_restriction_mouse_data_folder_path / 'Aligned.sortedByCoord.out.bam',
+        bam_file_path=star_solo_output_folder / 'Aligned.sortedByCoord.out.bam',
         cell_barcodes=set(barcodes_df['barcode']),
-        output_folder=split_by_cells_folder_path / dietary_restriction_mouse_data_folder_path.name)
+        output_folder=output_folder)
 
 
 if __name__ == "__main__":
-    # cellfile_data_path = Path('/cellfile/datapublic/jkoubele/sc_error_rate_data')
-    input_folder_path = Path('/cellfile/datapublic/acherdi1/rnaspeed/datasets_mm/age_DR/res/young_AL5')
-    # pysam.index(str(input_folder_path / 'Aligned.sortedByCoord.out.bam'))
-    barcodes_df = pd.read_csv(
-        input_folder_path / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
-        delimiter='\t',
-        names=['barcode'])
-    split_bam_file_by_cell_barcodes(
-        bam_file_path=input_folder_path / 'Aligned.sortedByCoord.out.bam',
-        cell_barcodes=set(barcodes_df['barcode']),
-        output_folder=Path('/cellfile/datapublic/jkoubele/DR_dataset/young_AL5'))
-
-    input_folder_path_2 = Path('/cellfile/datapublic/acherdi1/rnaspeed/datasets_mm/age_DR/res/AL4_old')
-    # pysam.index(str(input_folder_path / 'Aligned.sortedByCoord.out.bam'))
-    barcodes_df = pd.read_csv(
-        input_folder_path_2 / Path('Solo.out/GeneFull/filtered/barcodes.tsv'),
-        delimiter='\t',
-        names=['barcode'])
-    split_bam_file_by_cell_barcodes(
-        bam_file_path=input_folder_path_2 / 'Aligned.sortedByCoord.out.bam',
-        cell_barcodes=set(barcodes_df['barcode']),
-        output_folder=Path('/cellfile/datapublic/jkoubele/DR_dataset/AL4_old'))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--bam_input_folder',
+                        default='/cellfile/datapublic/jkoubele/perturb_seq_cf/BAM/SRR21603868',
+                        help='Folder containing .bam file to be processed.')
+    parser.add_argument('--output_folder',
+                        default='/cellfile/datapublic/jkoubele/perturb_seq_cf/split_by_cells/SRR21603868',
+                        help='Output .bam files will be written here.')
+    args = parser.parse_args()
+    split_star_solo_output(star_solo_output_folder=Path(args.bam_input_folder),
+                           output_folder=Path(args.output_folder))
