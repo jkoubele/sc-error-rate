@@ -167,8 +167,8 @@ def count_symbol_occurrences(nucleotides: list[str]) -> list[CountedSymbol]:
 def compute_bam_file_statistics(bam_file_path: Path,
                                 reference_genome: dict[str, Seq],
                                 min_reads_per_umi=5,
-                                min_consensus_reads=5,
-                                show_chromosome_progress_bar=True) -> BamFileStatistics:
+                                min_consensus_reads=3,
+                                show_chromosome_progress_bar=False) -> BamFileStatistics:
     """
     Detects transcriptional errors and mutations in the reads from single cell.
     :param bam_file_path: Path the a .bam file, which contains reads from a single cell.
@@ -333,8 +333,8 @@ if __name__ == "__main__":
                         default='/home/jakub/Desktop/dev_data/out',
                         help='Output JSON file will be written here.')
     parser.add_argument('--reference_genome_fasta_file',
-                        default='/home/jakub/Desktop/sc-error-rate/data/reference_genome/GRCm38.primary_assembly.genome.fa',
-                        # default='/cellfile/datapublic/jkoubele/STAR_2.7.11a/reference_genomes/GRCm38/GRCm38.primary_assembly.genome.fa',
+                        # default='/home/jakub/Desktop/sc-error-rate/data/reference_genome/GRCm38.primary_assembly.genome.fa',
+                        default='/cellfile/datapublic/jkoubele/STAR_2.7.11a/reference_genomes/GRCm38/GRCm38.primary_assembly.genome.fa',
                         help='FASTA file of the reference genome that was used for the alignment of the input .bam files.')
     args = parser.parse_args()
     process_bam_files(input_file_or_folder=Path(args.input_file_or_folder),
