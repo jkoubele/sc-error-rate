@@ -24,11 +24,12 @@ class CountedSymbol(DataClassJsonMixin):
 class MutationError(DataClassJsonMixin):
     chromosome_name: str
     position: int
-    reference_nucleotide: str
-    detected_nucleotide: str
-    num_unique_umi: int
-    read_counts: list[CountedSymbol]
-    consensus_read_counts: list[CountedSymbol]
+    is_on_forward_strand: bool
+    # reference_nucleotide: str
+    # detected_nucleotide: str
+    # num_unique_umi: int
+    # read_counts: list[CountedSymbol]
+    # consensus_read_counts: list[CountedSymbol]
 
 
 @dataclass
@@ -272,16 +273,18 @@ def compute_bam_file_statistics(bam_file_path: Path,
                                                consensus_read_counts=consensus_read_counts)
                         )
 
-
                     elif consensus_read_counts[0].count != num_consensus_reads or consensus_read_counts[
                         0].symbol != reference_symbol:
                         # mutation error
                         cell_error_statistics.num_positions_with_dna_mutations_detected += 1
                         cell_error_statistics.num_consensus_reads_with_dna_mutation += sum(
                             [x.count for x in consensus_read_counts if x.symbol != reference_symbol])
-                        record_mutations = False  # TODO
+                        record_mutations = True  # TODO
                         if record_mutations:
-                            raise NotImplementedError  # TODO
+                            cell_error_statistics.mutation_errors.append(MutationError(chromosome_name=chromosome_name,
+                                                                                       position=pileup_column.reference_pos,
+                                                                                       is_on_forward_strand=is_forward_strand))
+                           
                     else:
                         # all UMIs should agree with the reference genome
                         assert consensus_read_counts[0].count == num_consensus_reads and consensus_read_counts[
@@ -323,7 +326,7 @@ def process_bam_files(input_file_or_folder: Path,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_file_or_folder',
-                        default='/home/jakub/Desktop/dev_data/bam/subsampled.bam',
+                        default='/home/jakub/Desktop/dev_data/bam/ATTTAGGTCATTACTC.bam',
                         # default='/home/jakub/Desktop/liebniz_data/aligned/O_AL/Aligned.sortedByCoord.out.bam',
                         help='Folder containing .bam files to be processed.')
     parser.add_argument('--output_folder',
