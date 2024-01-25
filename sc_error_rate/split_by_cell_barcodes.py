@@ -1,3 +1,6 @@
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'  # solves weird error when importing numpy (and consequently e.g. pandas, biopython etc.) on cluster
+
 from pathlib import Path
 import argparse
 import pandas as pd

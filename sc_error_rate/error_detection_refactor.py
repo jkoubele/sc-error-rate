@@ -1,3 +1,6 @@
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'  # solves weird error when importing numpy (and consequently e.g. pandas, biopython etc.) on cluster
+
 import argparse
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -284,7 +287,7 @@ def compute_bam_file_statistics(bam_file_path: Path,
                             cell_error_statistics.mutation_errors.append(MutationError(chromosome_name=chromosome_name,
                                                                                        position=pileup_column.reference_pos,
                                                                                        is_on_forward_strand=is_forward_strand))
-                           
+
                     else:
                         # all UMIs should agree with the reference genome
                         assert consensus_read_counts[0].count == num_consensus_reads and consensus_read_counts[
