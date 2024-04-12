@@ -7,12 +7,12 @@ import argparse
 from collections import defaultdict
 from dataclasses import dataclass, field
 from itertools import chain
-from pathlib import Path
 from typing import Optional
 import pysam
 from Bio import SeqIO, Seq
 from dataclasses_json import DataClassJsonMixin
 from tqdm import tqdm
+from pathlib import Path
 
 DNA_ALPHABET = ('A', 'C', 'G', 'T')
 MIN_LENGTH_OF_VALID_CB_OR_UB_TAG = 5
@@ -323,17 +323,17 @@ def process_bam_files(input_file_or_folder: Path,
 
 
 if __name__ == "__main__":
+    test_folder = Path(__file__).parent.parent.resolve() / 'test_data'
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_file_or_folder',
-                        default='/home/jakub/Desktop/dev_data/bam/ATTTAGGTCATTACTC.bam',
-                        # default='/home/jakub/Desktop/liebniz_data/aligned/O_AL/Aligned.sortedByCoord.out.bam',
+                        default=str(test_folder / 'bam/split_by_cells'),
                         help='Folder containing .bam files to be processed.')
     parser.add_argument('--output_folder',
-                        default='/home/jakub/Desktop/dev_data/out',
+                        default=str(test_folder / 'out'),
                         help='Output JSON file will be written here.')
     parser.add_argument('--reference_genome_fasta_file',
-                        # default='/home/jakub/Desktop/sc-error-rate/data/reference_genome/GRCm38.primary_assembly.genome.fa',
-                        default='/cellfile/datapublic/jkoubele/STAR_2.7.11a/reference_genomes/GRCm38/GRCm38.primary_assembly.genome.fa',
+                        default='/home/jakub/Desktop/sc-error-rate/data/reference_genome/GRCm38.primary_assembly.genome.fa',
+                        # default='/cellfile/datapublic/jkoubele/STAR_2.7.11a/reference_genomes/GRCm38/GRCm38.primary_assembly.genome.fa',
                         help='FASTA file of the reference genome that was used for the alignment of the input .bam files.')
     args = parser.parse_args()
     process_bam_files(input_file_or_folder=Path(args.input_file_or_folder),
